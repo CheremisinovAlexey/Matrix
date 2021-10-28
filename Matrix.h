@@ -13,8 +13,17 @@ public:
     MATRIX operator=(const MATRIX& N);
     MATRIX operator+(const MATRIX& N);
     MATRIX operator*(int);
-    MATRIX operator*(MATRIX& N);
+    MATRIX operator*(const MATRIX& N);
+    MATRIX operator^(int i);
     MATRIX operator&();
+    template<typename Type> friend ostream& operator<<(ostream&, const MATRIX<Type>&);
+    template<typename Type> friend istream& operator>>(istream&, MATRIX<Type>&);
+
+    const T* operator[](int i) const {return M[i];}
+    T* operator[](int i)
+    {
+        return M[i];
+    }
 
     int GetMij(int i, int j)
     {
@@ -70,15 +79,12 @@ MATRIX<T> MATRIX<T>::operator=(const MATRIX& N)
         for (int i = 0; i < m; i++)
             delete[] M[i];
     }
-
     if (m > 0)
     {
         delete[] M;
     }
-
     m = N.m;
     n = N.n;
-
     M = (T**) new T*[m];
     for (int i = 0; i < m; i++)
         M[i] = (T*) new T[n];
@@ -92,25 +98,36 @@ MATRIX<T> MATRIX<T>::operator=(const MATRIX& N)
 template<typename T>
 MATRIX<T> MATRIX<T>::operator+(const MATRIX& N)
 {
+    MATRIX<T> K(m, n);
     for(int i = 0; i < m; i++)
         for (int j = 0; j < n; j++)
-            M[i][j] += N.M[i][j];
-    return *this;
+            K[i][j] = M[i][j];
+    for(int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+            K[i][j] += N[i][j];
+    return K;
 }
 
 template<typename T>
 MATRIX<T> MATRIX<T>::operator*(int a)
 {
+    MATRIX<T> K(m, n);
     for(int i = 0; i < m; i++)
         for (int j = 0; j < n; j++)
-            M[i][j] *= a;
-    return *this;
+            K[i][j] = M[i][j];
+    for(int i = 0; i < m; i++)
+        for (int j = 0; j < n; j++)
+            K[i][j] *= a;
+    return K;
 }
 
 template<typename T>
-MATRIX<T> MATRIX<T>::operator*(MATRIX& N)
+MATRIX<T> MATRIX<T>::operator*(const MATRIX& N)
 {
     MATRIX<T> K(m, N.n);
+    for (int i = 0; i < m; i++)
+        for (int j = 0; j < N.n; j++)
+            K[i][j] = 0;
     for (int i = 0; i < m; i++)
     {
         for (int j = 0; j < N.n; j++)
@@ -122,4 +139,49 @@ MATRIX<T> MATRIX<T>::operator*(MATRIX& N)
         }
     }
     return K;
+}
+
+template<typename T>
+MATRIX<T> MATRIX<T>::operator^(int i)
+{
+    MATRIX<T> K(m, n);
+    MATRIX<T> N(m, n);
+    for (int j = 0; j < m; j++)
+        for (int k = 0; k < n; k++)
+            K[j][k] = N[j][k] = M[j][k];
+    for (int j = 0; j < i - 1; j++)
+        K = K * N;
+    return K;
+}
+
+template<typename T>
+MATRIX<T> MATRIX<T>::operator&()
+{
+    MATRIX<T> K(n, m);
+    for (int i = 0; i < m; ++ i)
+        for (int j = 0; j < n; ++ j)
+            K[j][i] = M[i][j];
+    return K;
+}
+
+template<typename T>
+ostream& operator<<(ostream& out, const MATRIX<T>& N)
+{
+    for (int i = 0; i < N.m; i++)
+    {
+        for (int j = 0; j < N.n; j++)
+            out << N[i][j];
+    }
+    return out;
+}
+
+template<typename T>
+istream &operator>>(istream& in, MATRIX<T>& N)
+{
+    for (int i = 0; i < N.m; i++)
+    {
+        for (int j = 0; j < N.n; j++)
+            in >> N[i][j];
+    }
+    return in;
 }
