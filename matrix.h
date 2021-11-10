@@ -45,6 +45,23 @@ public:
         }
         cout << "-----------------" <<endl;
     }
+    double det()
+    {
+        double f, g;
+        g = 1;
+        for (int k = 0; k < n - 1; k++) {
+            for (int i = k + 1; i < n; i++) {
+                f = -M[i][k] / M[k][k];
+                for (int j = 0; j < n; j++) {
+                    M[i][j] += M[k][j] * f;
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            g *= M[i][i];
+        }
+        return g;
+    }
 };
 
 template<typename T>
